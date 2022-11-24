@@ -1,12 +1,10 @@
 [
     {
-        "id": "1",
         "brand": "Yamaha",
         "image": "https://i.ibb.co/Bg7jrgF/wp5995369.webp",
         "intro": "Powered by the air-cooled, 149cc single-cylinder engine with closed loop fuel injection system, FZ-S FI V2 ensures better fuel efficiency and supreme balance, equipped with discs on both wheels. ",
         "bikes": [
             {
-                "id":"1.1",
                 "name": "Yamaha R15",
                 "picture": "https://i.ibb.co/S79h2Vn/5dad54739135f.webp",
                 "location": "Delhi,India",
@@ -15,16 +13,14 @@
                 "used": " 2 year "
             },
             {
-                "id":"1.2",
                 "name": "Yamaha MT15",
-                "picture": "https://i.ibb.co/XCjjRqL/wp9097947.webp" ,
+                "picture": "https://i.ibb.co/XCjjRqL/wp9097947.webp",
                 "location": "Himachol,India",
                 "resaleprice": "1,90,000",
                 "originalprice": "2,30,000",
                 "used": " 6 months "
             },
             {
-                "id":"1.3",
                 "name": "Yamaha XSR 150CC",
                 "picture": "https://i.ibb.co/nLwqjtm/6731953.jpg",
                 "location": "Bangalore,India",
@@ -33,7 +29,6 @@
                 "used": "8 months "
             },
             {
-                "id":"1.4",
                 "name": "Yamaha FZS V2",
                 "picture": "https://i.ibb.co/7GDk8Q6/2362344.jpg",
                 "location": "Hyderabad",
@@ -44,40 +39,35 @@
         ]
     },
     {
-        "id": "2",
         "brand": "Suzuki",
         "image": "https://www.drivespark.com/images/2019-08/suzuki-gixxer-250-7.jpg",
         "intro": "Country’s Best Sport Bike Manufacturer; Rancon Motorbikes Limited, Suzuki’s New Gixxer Series & 100th Anniversary Limited Edition Bike is Now Available in Bangladesh",
         "bikes": [
             {
-                "id":"1.1",
                 "name": "Suzuki GSX R750",
-                "picture":"https://i.ibb.co/DMwWYnh/2848112.jpg",
+                "picture": "https://i.ibb.co/DMwWYnh/2848112.jpg",
                 "location": "Mumbai,India",
                 "resaleprice": "12,50,000",
                 "originalprice": "16,00,000",
                 "used": " 3 year "
             },
             {
-                "id":"1.2",
                 "name": "Suzuki Gixxer SF250",
-                "picture": "https://i.ibb.co/xm0C0PY/8b97e0ca5b0000e7225c5c1ad3e2771e.jpg" ,
+                "picture": "https://i.ibb.co/xm0C0PY/8b97e0ca5b0000e7225c5c1ad3e2771e.jpg",
                 "location": "Himachol,India",
                 "resaleprice": "1,90,000",
                 "originalprice": "2,30,000",
                 "used": " 6 months "
             },
             {
-                "id":"1.3",
                 "name": "Suzuki Gixxer 155 FI",
-                "picture": "https://i.ibb.co/197mDyw/8300226-B3020030600100.jpg" ,
+                "picture": "https://i.ibb.co/197mDyw/8300226-B3020030600100.jpg",
                 "location": "Bangalore,India",
                 "resaleprice": "1,70,000",
                 "originalprice": "2,00,000",
                 "used": "8 months "
             },
             {
-                "id":"1.4",
                 "name": "Suzuki Gixxer 155 Red",
                 "picture": "https://i.ibb.co/WPzGyyx/maxresdefault.jpg",
                 "location": "Hyderabad",
@@ -88,42 +78,37 @@
         ]
     },
     {
-        "id": "3",
         "brand": "TVS",
         "image": "https://www.iamabiker.com/wp-content/uploads/2021/04/2021-TVS-Apache-RTR-200-4V-HD-wallpapers-9.jpg",
         "intro": "TVS Motor manufactures the largest range of 2-wheelers, starting from mopeds, to scooters, commuter motorcycles, to racing inspired bikes like the Apache series and the RR310. Whatever your requirement be, we have one for everyone.",
         "bikes": [
             {
-                "id":"1.1",
                 "name": "TVS 4V 2017 SD Red",
-                "picture": "https://i.ibb.co/vkdNjn3/right-side-view.webp" ,
+                "picture": "https://i.ibb.co/vkdNjn3/right-side-view.webp",
                 "location": "Delhi,India",
                 "resaleprice": "1,50,000",
                 "originalprice": "2,00,000",
                 "used": " 2 year "
             },
             {
-                "id":"1.2",
                 "name": "TVS 4V 2020 DD Blue",
-                "picture": "https://i.ibb.co/LhH3BTK/2021-TVS-Apache-RTR-200-4-V-HD-wallpapers-1.jpg" ,
+                "picture": "https://i.ibb.co/LhH3BTK/2021-TVS-Apache-RTR-200-4-V-HD-wallpapers-1.jpg",
                 "location": "Himachol,India",
                 "resaleprice": "1,90,000",
                 "originalprice": "2,30,000",
                 "used": " 6 months "
             },
             {
-                "id":"1.3",
                 "name": "TVS Ronin",
-                "picture": "https://i.ibb.co/Kz3ZHFX/right-side-view-1299358818-930x620.webp" ,
+                "picture": "https://i.ibb.co/Kz3ZHFX/right-side-view-1299358818-930x620.webp",
                 "location": "Bangalore,India",
                 "resaleprice": "1,70,000",
                 "originalprice": "2,00,000",
                 "used": "8 months "
             },
             {
-                "id":"1.4",
                 "name": "TVS Apache RTR 2V",
-                "picture": "https://i.ibb.co/s96nMyy/tvs-apache-rtr180-longterm-review-pic-image-photoz-zigwheels-22012015-m2-560x420.jpg" ,
+                "picture": "https://i.ibb.co/s96nMyy/tvs-apache-rtr180-longterm-review-pic-image-photoz-zigwheels-22012015-m2-560x420.jpg",
                 "location": "Hyderabad",
                 "resaleprice": "1,00,000",
                 "originalprice": "1,50,000",
@@ -132,13 +117,11 @@
         ]
     },
     {
-        "id": "4",
         "brand": "Bajaj",
         "image": "https://wallpaperaccess.com/full/1890481.jpg",
         "intro": "With more than 18 million motorcycles sold in over 70 countries, the Bajaj brand is truly ‘The World’s Favourite Indian’. It is India’s No.1 motorcycle exporter with two out of three bikes sold internationally carrying a Bajaj badge.",
         "bikes": [
             {
-                "id":"1.1",
                 "name": "Bajaj Dominar 400",
                 "picture": "https://i.ibb.co/bKcwQ0M/Bajaj-Dominar-400-2019-Image-2.webp",
                 "location": "Delhi,India",
@@ -147,27 +130,24 @@
                 "used": " 2 year "
             },
             {
-                "id":"1.2",
                 "name": "Pulsar N250",
-                "picture": "https://i.ibb.co/VtMFvTC/pulsar-n250618a580e7bc14.webp" ,
+                "picture": "https://i.ibb.co/VtMFvTC/pulsar-n250618a580e7bc14.webp",
                 "location": "Himachol,India",
                 "resaleprice": "1,90,000",
                 "originalprice": "2,30,000",
                 "used": " 6 months "
             },
             {
-                "id":"1.3",
                 "name": "Pulsar NS160",
-                "picture": "https://i.ibb.co/zxgfjZs/HD-wallpaper-pulsar-ns-200-king-motor-motorcycle-racer-sport-street.jpg" ,
+                "picture": "https://i.ibb.co/zxgfjZs/HD-wallpaper-pulsar-ns-200-king-motor-motorcycle-racer-sport-street.jpg",
                 "location": "Bangalore,India",
                 "resaleprice": "1,70,000",
                 "originalprice": "2,00,000",
                 "used": "8 months "
             },
             {
-                "id":"1.4",
                 "name": "Pulsar 150CC",
-                "picture": "https://i.ibb.co/YjM0d4B/5402111.jpg" ,
+                "picture": "https://i.ibb.co/YjM0d4B/5402111.jpg",
                 "location": "Hyderabad",
                 "resaleprice": "1,00,000",
                 "originalprice": "1,50,000",
