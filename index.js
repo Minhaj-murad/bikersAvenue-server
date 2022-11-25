@@ -25,10 +25,11 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
-        const catagorycollection  = client.db('bikersavenue').collection('catagories');
-        const customercollection  = client.db('bikersavenue').collection('customers');
-        const allbikecollection  = client.db('bikersavenue').collection('allbikes');
-        
+        const catagorycollection = client.db('bikersavenue').collection('catagories');
+        const customercollection = client.db('bikersavenue').collection('customers');
+        const allbikecollection = client.db('bikersavenue').collection('allbikes');
+        const sellercollection = client.db('bikersavenue').collection('sellers');
+
 
         app.get('/bikecategories', async (req, res) => {
             const query = {};
@@ -37,16 +38,16 @@ async function run() {
             res.send(catagories)
         })
         // finding a bike by catagoryid
-        app.get('/motorbikes/:id',async (req,res)=>{
-            const id=req.params.id;
-            const query ={catagoryid:id};
+        app.get('/motorbikes/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { catagoryid: id };
             console.log(query);
-            const result=await allbikecollection.find(query).toArray();
+            const result = await allbikecollection.find(query).toArray();
             res.send(result);
             console.log(result);
         })
 
-    //    finding all bikes
+        //    finding all bikes
         app.get('/bikes', async (req, res) => {
             const query = {};
             const cursor = allbikecollection.find(query);
@@ -54,16 +55,25 @@ async function run() {
             res.send(bikes)
         })
         // posting a new bike
-        app.post('/bikes',async(req,res)=>{
-             const bike=req.body;
-             const result=await allbikecollection.insertOne(bike);
-             res.send(result)
+        app.post('/bikes', async (req, res) => {
+            const bike = req.body;
+            const result = await allbikecollection.insertOne(bike);
+            res.send(result)
 
 
         })
-        
+
+        app.get('/sellerbikes', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = allbikecollection.find(query);
+            const bikes = await cursor.toArray();
+            res.send(bikes)
+        })
+
       
-        
+
+
 
         // posting customer collection
         app.post('/customers', async (req, res) => {
@@ -85,11 +95,16 @@ async function run() {
             const customers = await cursor.toArray();
             res.send(customers)
         })
+        app.get('/users', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const myorders = await customercollection.find(query).toArray();
+            res.send(myorders)
+        })
 
-      
 
-    
-       
+
+
     }
     finally {
 
