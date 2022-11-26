@@ -32,6 +32,7 @@ async function run() {
 
         const usercollection = client.db('bikersavenue').collection('users');
         const buyercollection = client.db('bikersavenue').collection('buyers');
+        const advertisecollection = client.db('bikersavenue').collection('advertises');
 
              //  Verifying JWT
 
@@ -52,6 +53,16 @@ async function run() {
           req.decoded = decoded;
           next();
         })
+      }
+      // verify admin should be after verify JWT
+    const verifyAdmin = async (req, res, next) => {
+        const decodedEmail = req.decoded.email;
+        const query = { email: decodedEmail };
+        const user = await usercollection.findOne(query);
+        if (user.role !== 'admin') {
+          return res.status(401).send({ message: 'Forbidden access' })
+        }
+        next()
       }
 
     //   getting all catagories
@@ -101,6 +112,13 @@ async function run() {
             const users = await usercollection.find(query).toArray();
             res.send(users);
         });
+
+        // posting advertise in advertisecollection
+        app.post('/users/advertise',async(req,res)=>{
+            const advertise = req.body;
+            const result = await advertisecollection.insertOne(advertise);
+            res.send(result)
+        })
 
 
         //  How to use JWT server 
@@ -186,7 +204,27 @@ async function run() {
       
             res.send({ isSeller: user?.role === 'seller' });
           })
-        
+                
+
+        //   verifying seller
+        app.put('/users/seller/:id',verfiyJWT,  async (req, res) => {
+            const decodedEmail=req.decoded.email;
+            const query = {email:decodedEmail};
+            const user = await usercollection.findOne(query);
+            if(user.role !== 'seller'){
+             return res.status(401).send({message:'Forbidden access'})
+            }
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+              $set: {
+                role: 'seller'
+              }
+            }
+            const result = await usercollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+          })
 
 
         app.post('/buyers', async (req, res) => {
@@ -195,7 +233,20 @@ async function run() {
             res.send(result)
         })
 
-
+        //  getting advertised products
+         app.get('/advertises', async(req,res)=>{
+            const query = {};
+            const advertise = await advertisecollection.find(query).toArray();
+            res.send(advertise);
+         })
+         
+        //  deleteing a buyer
+        app.delete('/users/:id',  async (req, res) => {
+            const id = parseInt(req.params.id);
+            const filter = { _id: ObjectId(id) };
+            const result = await usercollection.deleteOne(filter);
+            res.send(result);
+          })
 
 
         // posting customer collection
