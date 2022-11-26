@@ -28,7 +28,8 @@ async function run() {
         const catagorycollection = client.db('bikersavenue').collection('catagories');
         const customercollection = client.db('bikersavenue').collection('customers');
         const allbikecollection = client.db('bikersavenue').collection('allbikes');
-        const sellercollection = client.db('bikersavenue').collection('sellers');
+
+        const usercollection = client.db('bikersavenue').collection('users');
 
 
         app.get('/bikecategories', async (req, res) => {
@@ -71,7 +72,18 @@ async function run() {
             res.send(bikes)
         })
 
-      
+
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await usercollection.find(query).toArray();
+            res.send(users);
+          });
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usercollection.insertOne(user);
+            res.send(result)
+        })
+
 
 
 
