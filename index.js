@@ -116,13 +116,77 @@ async function run() {
             res.status(403).send({ accessToken: 'token not found' })
         })
 
-
+        // inserting users in database
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usercollection.insertOne(user);
             res.send(result)
         })
+        
+        //    getting sellers
 
+          
+        // app.get('/users',async(req,res)=>{
+        //     // const role=req.query.role;
+        //     let query ={};
+        //     if(req.query.role){
+        //       query={role:req.query.role}
+        //     }
+        //     else{
+        //         query={email:req.query.email}
+        //     }
+        //     const result = await usercollection.find(query).toArray();
+        //     res.send(result)
+        // })
+
+        // making any users admin
+        app.put('/users/admin/:id',verfiyJWT,  async (req, res) => {
+            const decodedEmail=req.decoded.email;
+            const query = {email:decodedEmail};
+            const user = await usercollection.findOne(query);
+            if(user.role !== 'admin'){
+             return res.status(401).send({message:'Forbidden access'})
+            }
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+              $set: {
+                role: 'admin'
+              }
+            }
+            const result = await usercollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+          })
+
+        //   checking admin 
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+      
+            const query = { email };
+      
+            //  const user = await userCollection.findOne(query);
+            const users = await usercollection.find({}).toArray();
+      
+            const user = users.find(admin => admin.email.toLowerCase() === email.toLowerCase());
+      
+            res.send({ isAdmin: user?.role === 'admin' });
+          })
+        
+        //   checking seller 
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+      
+            const query = { email };
+      
+            //  const user = await userCollection.findOne(query);
+            const users = await usercollection.find({}).toArray();
+      
+            const user = users.find(seller => seller.email.toLowerCase() === email.toLowerCase());
+      
+            res.send({ isSeller: user?.role === 'seller' });
+          })
+        
 
 
         app.post('/buyers', async (req, res) => {
@@ -151,7 +215,7 @@ async function run() {
             const result = await customercollection.insertOne(booking);
             res.send(result)
           })
-        //   getting a customer 
+        //   getting all buyers 
         app.get('/customers', async (req, res) => {
             const query = {};
             const cursor = customercollection.find(query);
