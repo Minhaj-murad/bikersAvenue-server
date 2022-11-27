@@ -31,8 +31,9 @@ async function run() {
         const allbikecollection = client.db('bikersavenue').collection('allbikes');
 
         const usercollection = client.db('bikersavenue').collection('users');
-        const buyercollection = client.db('bikersavenue').collection('buyers');
+        // const buyercollection = client.db('bikersavenue').collection('buyers');
         const advertisecollection = client.db('bikersavenue').collection('advertises');
+        const wishescollection = client.db('bikersavenue').collection('wishes');
 
         //  Verifying JWT
 
@@ -185,6 +186,33 @@ async function run() {
         const result = await usercollection.updateOne(filter, updatedDoc, options);
         res.send(result);
     })
+          
+    
+    
+    app.delete('/sellerbikes/:id',async(req,res)=>{
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id) };
+        const result = await allbikecollection.deleteOne(filter);
+        res.send(result);
+    })
+    
+    
+    // status changing
+    app.put('/sellerbikes/:id', async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const filter = { _id: ObjectId(id) }
+        const options = { upsert: true };
+        const updatedDoc = {
+            $set: {
+                status: 'sold' 
+                
+            }
+        }
+        const result = await allbikecollection.updateOne(filter, updatedDoc, options);
+        res.send(result);
+    })
+
 
     //   checking admin 
     app.get('/users/admin/:email', async (req, res) => {
@@ -195,7 +223,7 @@ async function run() {
         //  const user = await userCollection.findOne(query);
         const users = await usercollection.find({}).toArray();
 
-        const user = users.find(admin => admin.email.toLowerCase() === email.toLowerCase());
+        const user = users.find(admin => admin?.email?.toLowerCase() === email?.toLowerCase());
 
         res.send({ isAdmin: user?.role === 'admin' });
     })
@@ -209,7 +237,7 @@ async function run() {
         //  const user = await userCollection.findOne(query);
         const users = await usercollection.find({}).toArray();
 
-        const user = users.find(seller => seller.email.toLowerCase() === email.toLowerCase());
+        const user = users.find(seller => seller?.email?.toLowerCase() === email?.toLowerCase());
 
         res.send({ isSeller: user?.role === 'seller' });
     })
@@ -240,11 +268,11 @@ async function run() {
     })
 
 
-    app.post('/buyers', async (req, res) => {
-        const buyer = req.body;
-        const result = await buyercollection.insertOne(buyer);
-        res.send(result)
-    })
+    // app.post('/buyers', async (req, res) => {
+    //     const buyer = req.body;
+    //     const result = await buyercollection.insertOne(buyer);
+    //     res.send(result)
+    // })
 
     //  getting advertised products
     app.post('/advertises', async (req, res) => {
@@ -266,6 +294,15 @@ async function run() {
         res.send(result);
     })
 
+    // delete all bikes of  seller
+    // app.delete('/users/sellerbike/:email', async (req, res) => {
+    //     const email = parseInt(req.params.email);
+    //     const query = { email: email };
+    //     // const query={}
+    //     const result = await allbikecollection.deleteMany({});
+    //     res.send(result);
+    // })
+
 
     // posting customer collection
     app.post('/bookings', async (req, res) => {
@@ -278,7 +315,7 @@ async function run() {
         }
         const alreadybooked = await customercollection.find(query).toArray();
         if (alreadybooked.length) {
-            const message = `you already have a booking on ${booking.bikeName}`;
+            const message = `you already purchased ${booking.bikeName}`;
             return res.send({ acknowledged: false, message })
         }
         const result = await customercollection.insertOne(booking);
@@ -292,20 +329,42 @@ async function run() {
         res.send(customers)
     })
     // getting a user
-    app.get('/bookings', verfiyJWT, async (req, res) => {
+    app.get('/bookings', async (req, res) => {
         const email = req.query.email;
         // by doing these one cant get data without authantiaction
-        const decodedemail = req.decoded.email;
-        if (email !== decodedemail) {
-            return res.status(403).send({ message: "forbidden access" })
-        }
+        // const decodedemail = req.decoded.email;
+        // if (email !== decodedemail) {
+        //     return res.status(403).send({ message: "forbidden access" })
+        // }
         // console.log('token',req.headers.authorization);
         const query = { email: email }
         const myorders = await customercollection.find(query).toArray();
         res.send(myorders)
     })
 
+    //   posting to wishlists
+    app.post('/wishlists', async (req, res) => {
+        const bike = req.body;
+        const result = await wishescollection.insertOne(bike);
+        res.send(result)
 
+
+    })
+    app.get('/wishlists', async (req, res) => {
+           const query = {};
+            const cursor = wishescollection.find(query);
+            const wishes = await cursor.toArray();
+            res.send(wishes)
+
+
+    })
+    app.get('/wishlist', async (req, res) => {
+        const email = req.query.email;
+        const query = { email: email };
+        const cursor = wishescollection.find(query);
+        const wishes = await cursor.toArray();
+        res.send(wishes)
+    })
 
 
 }
