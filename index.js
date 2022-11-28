@@ -1,11 +1,13 @@
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const jwt = require('jsonwebtoken')
-require('dotenv').config();
 
+require('dotenv').config()
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const jwt = require('jsonwebtoken')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require("stripe")(process.env.STRIPE_KEY)
+
+const port = process.env.PORT || 5000;
 
 
 app.use(cors());
@@ -34,7 +36,7 @@ async function run() {
         // const buyercollection = client.db('bikersavenue').collection('buyers');
         const advertisecollection = client.db('bikersavenue').collection('advertises');
         const wishescollection = client.db('bikersavenue').collection('wishes');
-
+        const paymentsCollection = client.db('bikersavenue').collection('payments')
         //  Verifying JWT
 
         function verfiyJWT(req, res, next) {
@@ -65,6 +67,38 @@ async function run() {
             }
             next()
         }
+
+        // STRIPE PAYMENT
+        app.post('/create-payment-intent', async (req, res) => {
+            const booking = req.body;
+            const price = parseInt(booking.resaleprice);
+            const amount = price * 100;
+      
+            const paymentIntent = await stripe.paymentIntents.create({
+              currency: 'usd',
+              amount: amount,
+              "payment_method_types": [
+                "card"
+              ]
+            });
+            res.send({
+              clientSecret: paymentIntent.client_secret,
+            });
+          });
+          app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentsCollection.insertOne(payment);
+            const id = payment.bookingId
+            const filter = { _id: ObjectId(id) }
+            const updatedDoc = {
+              $set: {
+                paid: true,
+                transactionId: payment.transactionId
+              }
+            }
+            const updatedResult = await customercollection.updateOne(filter, updatedDoc)
+            res.send(result);
+          })
 
         //   getting all catagories
         app.get('/bikecategories', async (req, res) => {
@@ -159,218 +193,228 @@ async function run() {
         // })
 
         //   deleting a seller
-        app.delete('/users/seller/:id',async(req,res)=>{
-        
-        const id = req.params.id;
-        const filter = { _id: ObjectId(id) }
-        const result = await usercollection.deleteOne(filter);
-        res.send(result);
-    })
+        app.delete('/users/seller/:id', async (req, res) => {
 
-    // making any users admin
-    app.put('/users/admin/:id', verfiyJWT, async (req, res) => {
-        const decodedEmail = req.decoded.email;
-        const query = { email: decodedEmail };
-        const user = await usercollection.findOne(query);
-        if (user.role !== 'admin') {
-            return res.status(401).send({ message: 'Forbidden access' })
-        }
-        const id = req.params.id;
-        const filter = { _id: ObjectId(id) }
-        const options = { upsert: true };
-        const updatedDoc = {
-            $set: {
-                role: 'admin'
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await usercollection.deleteOne(filter);
+            res.send(result);
+        })
+
+        // making any users admin
+        app.put('/users/admin/:id', verfiyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usercollection.findOne(query);
+            if (user.role !== 'admin') {
+                return res.status(401).send({ message: 'Forbidden access' })
             }
-        }
-        const result = await usercollection.updateOne(filter, updatedDoc, options);
-        res.send(result);
-    })
-          
-    
-    
-    app.delete('/sellerbikes/:id',async(req,res)=>{
-        const id = req.params.id;
-        const filter = { _id: ObjectId(id) };
-        const result = await allbikecollection.deleteOne(filter);
-        res.send(result);
-    })
-    
-    
-    // status changing
-    app.put('/sellerbikes/:id', async (req, res) => {
-        const id = req.params.id;
-        console.log(id);
-        const filter = { _id: ObjectId(id) }
-        const options = { upsert: true };
-        const updatedDoc = {
-            $set: {
-                status: 'sold' 
-                
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
             }
-        }
-        const result = await allbikecollection.updateOne(filter, updatedDoc, options);
-        res.send(result);
-    })
+            const result = await usercollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
 
 
-    //   checking admin 
-    app.get('/users/admin/:email', async (req, res) => {
-        const email = req.params.email;
 
-        const query = { email };
-
-        //  const user = await userCollection.findOne(query);
-        const users = await usercollection.find({}).toArray();
-
-        const user = users.find(admin => admin?.email?.toLowerCase() === email?.toLowerCase());
-
-        res.send({ isAdmin: user?.role === 'admin' });
-    })
-
-    //   checking seller 
-    app.get('/users/seller/:email', async (req, res) => {
-        const email = req.params.email;
-
-        const query = { email };
-
-        //  const user = await userCollection.findOne(query);
-        const users = await usercollection.find({}).toArray();
-
-        const user = users.find(seller => seller?.email?.toLowerCase() === email?.toLowerCase());
-
-        res.send({ isSeller: user?.role === 'seller' });
-    })
+        app.delete('/sellerbikes/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await allbikecollection.deleteOne(filter);
+            res.send(result);
+        })
 
 
-    //   verifying seller
-    app.put('/users/seller/:id',  async (req, res) => {
-        // const decodedEmail = req.decoded.email;
-        // const query = { email: decodedEmail };
-        // const email=req.params.id;
-        // console.log(email);
-        // const user = await usercollection.findOne(email);
-        // if (user.role !== 'seller') {
-        //     return res.status(401).send({ message: 'Forbidden access' })
-        // }
-        const id = req.params.id;
-        const filter = { _id: ObjectId(id) }
-        console.log(filter);
-        const options = { upsert: true };
-        const updatedDoc = {
-            $set: {
-                type: 'verified'
+        // status changing
+        app.put('/sellerbikes/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    status: 'sold'
+
+                }
             }
-        }
-        console.log(updatedDoc);
-        const result = await usercollection.updateOne(filter, updatedDoc,options);
-        res.send(result);
-    })
+            const result = await allbikecollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
 
 
-    // app.post('/buyers', async (req, res) => {
-    //     const buyer = req.body;
-    //     const result = await buyercollection.insertOne(buyer);
-    //     res.send(result)
-    // })
+        //   checking admin 
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
 
-    //  getting advertised products
-    app.post('/advertises', async (req, res) => {
-        const product = req.body;
-        const advertise = await advertisecollection.insertOne(product)
-        res.send(advertise);
-    })
-    app.get('/advertises', async (req, res) => {
-        const query = {};
-        const advertise = await advertisecollection.find(query).toArray();
-        res.send(advertise);
-    })
+            const query = { email };
 
-    //  deleteing a buyer
-    app.delete('/users/:id', async (req, res) => {
-        const id = parseInt(req.params.id);
-        const filter = { _id: ObjectId(id) };
-        const result = await usercollection.deleteOne(filter);
-        res.send(result);
-    })
+            //  const user = await userCollection.findOne(query);
+            const users = await usercollection.find({}).toArray();
 
-    // delete all bikes of  seller
-    // app.delete('/users/sellerbike/:email', async (req, res) => {
-    //     const email = parseInt(req.params.email);
-    //     const query = { email: email };
-    //     // const query={}
-    //     const result = await allbikecollection.deleteMany({});
-    //     res.send(result);
-    // })
+            const user = users.find(admin => admin?.email?.toLowerCase() === email?.toLowerCase());
+
+            res.send({ isAdmin: user?.role === 'admin' });
+        })
+
+        //   checking seller 
+        app.get('/users/seller/:email', async (req, res) => {
+            const email = req.params.email;
+
+            const query = { email };
+
+            //  const user = await userCollection.findOne(query);
+            const users = await usercollection.find({}).toArray();
+
+            const user = users.find(seller => seller?.email?.toLowerCase() === email?.toLowerCase());
+
+            res.send({ isSeller: user?.role === 'seller' });
+        })
 
 
-    // posting customer collection
-    app.post('/bookings', async (req, res) => {
-        const booking = req.body;
-        const query = {
-            bikeName: booking.bikeName,
-            email: booking.email,
-            name: booking.name
-
-        }
-        const alreadybooked = await customercollection.find(query).toArray();
-        if (alreadybooked.length) {
-            const message = `you already purchased ${booking.bikeName}`;
-            return res.send({ acknowledged: false, message })
-        }
-        const result = await customercollection.insertOne(booking);
-        res.send(result)
-    })
-    //   getting all buyers 
-    app.get('/customers', async (req, res) => {
-        const query = {};
-        const cursor = customercollection.find(query);
-        const customers = await cursor.toArray();
-        res.send(customers)
-    })
-    // getting a user
-    app.get('/bookings', async (req, res) => {
-        const email = req.query.email;
-        // by doing these one cant get data without authantiaction
-        // const decodedemail = req.decoded.email;
-        // if (email !== decodedemail) {
-        //     return res.status(403).send({ message: "forbidden access" })
-        // }
-        // console.log('token',req.headers.authorization);
-        const query = { email: email }
-        const myorders = await customercollection.find(query).toArray();
-        res.send(myorders)
-    })
-
-    //   posting to wishlists
-    app.post('/wishlists', async (req, res) => {
-        const bike = req.body;
-        const result = await wishescollection.insertOne(bike);
-        res.send(result)
+        //   verifying seller
+        app.put('/users/seller/:id', async (req, res) => {
+            // const decodedEmail = req.decoded.email;
+            // const query = { email: decodedEmail };
+            // const email=req.params.id;
+            // console.log(email);
+            // const user = await usercollection.findOne(email);
+            // if (user.role !== 'seller') {
+            //     return res.status(401).send({ message: 'Forbidden access' })
+            // }
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            console.log(filter);
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    type: 'verified'
+                }
+            }
+            console.log(updatedDoc);
+            const result = await usercollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
 
 
-    })
-    app.get('/wishlists', async (req, res) => {
-           const query = {};
+        // app.post('/buyers', async (req, res) => {
+        //     const buyer = req.body;
+        //     const result = await buyercollection.insertOne(buyer);
+        //     res.send(result)
+        // })
+
+        //  getting advertised products
+        app.post('/advertises', async (req, res) => {
+            const product = req.body;
+            const advertise = await advertisecollection.insertOne(product)
+            res.send(advertise);
+        })
+        app.get('/advertises', async (req, res) => {
+            const query = {};
+            const advertise = await advertisecollection.find(query).toArray();
+            res.send(advertise);
+        })
+
+        //  deleteing a buyer
+        app.delete('/users/:id', async (req, res) => {
+            const id = parseInt(req.params.id);
+            const filter = { _id: ObjectId(id) };
+            const result = await usercollection.deleteOne(filter);
+            res.send(result);
+        })
+
+        // delete all bikes of  seller
+        // app.delete('/users/sellerbike/:email', async (req, res) => {
+        //     const email = parseInt(req.params.email);
+        //     const query = { email: email };
+        //     // const query={}
+        //     const result = await allbikecollection.deleteMany({});
+        //     res.send(result);
+        // })
+
+        // get bookings by id 
+        app.get('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const booking = await customercollection.findOne(query);
+            res.send(booking);
+        })
+
+
+
+        // posting customer collection
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            const query = {
+                bikeName: booking.bikeName,
+                email: booking.email,
+                name: booking.name
+
+            }
+            const alreadybooked = await customercollection.find(query).toArray();
+            if (alreadybooked.length) {
+                const message = `you already purchased ${booking.bikeName}`;
+                return res.send({ acknowledged: false, message })
+            }
+            const result = await customercollection.insertOne(booking);
+            res.send(result)
+        })
+        //   getting all buyers 
+        app.get('/customers', async (req, res) => {
+            const query = {};
+            const cursor = customercollection.find(query);
+            const customers = await cursor.toArray();
+            res.send(customers)
+        })
+        // getting a user
+        app.get('/bookings', async (req, res) => {
+            const email = req.query.email;
+            // by doing these one cant get data without authantiaction
+            // const decodedemail = req.decoded.email;
+            // if (email !== decodedemail) {
+            //     return res.status(403).send({ message: "forbidden access" })
+            // }
+            // console.log('token',req.headers.authorization);
+            const query = { email: email }
+            const myorders = await customercollection.find(query).toArray();
+            res.send(myorders)
+        })
+
+        //   posting to wishlists
+        app.post('/wishlists', async (req, res) => {
+            const bike = req.body;
+            const result = await wishescollection.insertOne(bike);
+            res.send(result)
+
+
+        })
+        app.get('/wishlists', async (req, res) => {
+            const query = {};
             const cursor = wishescollection.find(query);
             const wishes = await cursor.toArray();
             res.send(wishes)
 
 
-    })
-    app.get('/wishlist', async (req, res) => {
-        const email = req.query.email;
-        const query = { email: email };
-        const cursor = wishescollection.find(query);
-        const wishes = await cursor.toArray();
-        res.send(wishes)
-    })
+        })
+        // getting wishlists by email
+        app.get('/wishlist', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = wishescollection.find(query);
+            const wishes = await cursor.toArray();
+            res.send(wishes)
+        })
 
 
-}
+    }
     finally {
 
-}
+    }
 
 }
 run().catch(error => console.log(error));
